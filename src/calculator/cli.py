@@ -4,6 +4,7 @@ from calculator.operations import (
     add as op_add, subtract, multiply, divide,
     power, square_root, filter_even, filter_odd
 )
+from calculator.exit_codes import ExitCode
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
@@ -29,7 +30,7 @@ def add_all(numbers):
     numbers = numbers or _read_numbers_from_stdin()
     if not numbers:
         click.echo("Error: provide numbers as arguments or via stdin.", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.NO_DATA)
     parsed = _parse_numbers(numbers)
     result = op_add(parsed)
     click.echo(f"Result: {result}")
@@ -42,16 +43,16 @@ def add_even(numbers):
     numbers = numbers or _read_numbers_from_stdin()
     if not numbers:
         click.echo("Error: provide numbers as arguments or via stdin.", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.NO_DATA)
     parsed = _parse_numbers(numbers)
     try:
         evens = filter_even(parsed)
     except ValueError as e:
         click.echo(f"Error: {e}", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.INPUT_ERROR)
     if not evens:
         click.echo("No even numbers found.")
-        return
+        raise SystemExit(ExitCode.NO_DATA)
     result = op_add(evens)
     click.echo(f"Even numbers: {evens}")
     click.echo(f"Result: {result}")
@@ -64,16 +65,16 @@ def add_odd(numbers):
     numbers = numbers or _read_numbers_from_stdin()
     if not numbers:
         click.echo("Error: provide numbers as arguments or via stdin.", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.NO_DATA)
     parsed = _parse_numbers(numbers)
     try:
         odds = filter_odd(parsed)
     except ValueError as e:
         click.echo(f"Error: {e}", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.INPUT_ERROR)
     if not odds:
         click.echo("No odd numbers found.")
-        return
+        raise SystemExit(ExitCode.NO_DATA)
     result = op_add(odds)
     click.echo(f"Odd numbers: {odds}")
     click.echo(f"Result: {result}")
@@ -88,7 +89,7 @@ def sub(numbers):
     numbers = numbers or _read_numbers_from_stdin()
     if not numbers:
         click.echo("Error: provide numbers as arguments or via stdin.", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.NO_DATA)
     parsed = _parse_numbers(numbers)
     result = subtract(parsed)
     click.echo(f"Result: {result}")
@@ -103,7 +104,7 @@ def mul(numbers):
     numbers = numbers or _read_numbers_from_stdin()
     if not numbers:
         click.echo("Error: provide numbers as arguments or via stdin.", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.NO_DATA)
     parsed = _parse_numbers(numbers)
     result = multiply(parsed)
     click.echo(f"Result: {result}")
@@ -118,14 +119,14 @@ def div(numbers):
     numbers = numbers or _read_numbers_from_stdin()
     if not numbers:
         click.echo("Error: provide numbers as arguments or via stdin.", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.NO_DATA)
     parsed = _parse_numbers(numbers)
     try:
         result = divide(parsed)
         click.echo(f"Result: {result}")
     except ValueError as e:
         click.echo(f"Error: {e}", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.MATH_ERROR)
 
 
 # ─── POWER ────────────────────────────────────────────────────────────────────
@@ -151,7 +152,7 @@ def sqrt(number):
         click.echo(f"Result: {result}")
     except ValueError as e:
         click.echo(f"Error: {e}", err=True)
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.MATH_ERROR)
 
 
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -184,5 +185,5 @@ def _parse_numbers(raw: tuple) -> list[int | float]:
                 "Provide integers (1 2 3) or decimals (1.5 2.5).",
                 err=True,
             )
-            raise SystemExit(1)
+            raise SystemExit(ExitCode.INPUT_ERROR)
     return result

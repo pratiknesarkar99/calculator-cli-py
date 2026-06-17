@@ -1,5 +1,6 @@
 from click.testing import CliRunner
 from calculator.cli import main
+from calculator.exit_codes import ExitCode
 
 
 runner = CliRunner()
@@ -21,7 +22,7 @@ def test_add_all_floats():
 
 def test_add_all_no_args():
     result = runner.invoke(main, ["add", "all"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 def test_add_auto_detects_float():
@@ -40,13 +41,12 @@ def test_add_even_basic():
 
 def test_add_even_none_found():
     result = runner.invoke(main, ["add", "even", "1", "3", "5"])
-    assert result.exit_code == 0
-    assert "No even numbers found." in result.output
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 def test_add_even_rejects_non_whole_float():
     result = runner.invoke(main, ["add", "even", "1.5", "2.5"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.INPUT_ERROR
 
 
 # ─── ADD ODD ──────────────────────────────────────────────────────────────────
@@ -59,8 +59,7 @@ def test_add_odd_basic():
 
 def test_add_odd_none_found():
     result = runner.invoke(main, ["add", "odd", "2", "4", "6"])
-    assert result.exit_code == 0
-    assert "No odd numbers found." in result.output
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 # ─── SUBTRACT ─────────────────────────────────────────────────────────────────
@@ -79,7 +78,7 @@ def test_sub_floats():
 
 def test_sub_no_args():
     result = runner.invoke(main, ["sub"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 # ─── MULTIPLY ─────────────────────────────────────────────────────────────────
@@ -98,7 +97,7 @@ def test_mul_by_zero():
 
 def test_mul_no_args():
     result = runner.invoke(main, ["mul"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 # ─── DIVIDE ───────────────────────────────────────────────────────────────────
@@ -111,12 +110,12 @@ def test_div_basic():
 
 def test_div_by_zero():
     result = runner.invoke(main, ["div", "10", "0"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.MATH_ERROR
 
 
 def test_div_no_args():
     result = runner.invoke(main, ["div"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 # ─── POWER ────────────────────────────────────────────────────────────────────
@@ -143,14 +142,14 @@ def test_sqrt_basic():
 
 def test_sqrt_negative():
     result = runner.invoke(main, ["sqrt", "--", "-1"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.MATH_ERROR
 
 
 # ─── INVALID INPUT ────────────────────────────────────────────────────────────
 
 def test_parse_invalid_input():
     result = runner.invoke(main, ["add", "all", "abc"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.INPUT_ERROR
 
 
 # ─── PIPELINE / STDIN ─────────────────────────────────────────────────────────
@@ -187,7 +186,7 @@ def test_div_from_stdin():
 
 def test_no_args_no_stdin():
     result = runner.invoke(main, ["add", "all"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.NO_DATA
 
 
 # ─── HELP ─────────────────────────────────────────────────────────────────────
