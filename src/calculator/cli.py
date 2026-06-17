@@ -1,3 +1,4 @@
+import sys
 import click
 from calculator.operations import (
     add as op_add, subtract, multiply, divide,
@@ -22,18 +23,26 @@ def add():
 
 
 @add.command("all")
-@click.argument("numbers", nargs=-1, required=True)
+@click.argument("numbers", nargs=-1, required=False)
 def add_all(numbers):
-    """Add all provided numbers."""
+    """Add all provided numbers. Reads from stdin if no arguments given."""
+    numbers = numbers or _read_numbers_from_stdin()
+    if not numbers:
+        click.echo("Error: provide numbers as arguments or via stdin.", err=True)
+        raise SystemExit(1)
     parsed = _parse_numbers(numbers)
     result = op_add(parsed)
     click.echo(f"Result: {result}")
 
 
 @add.command("even")
-@click.argument("numbers", nargs=-1, required=True)
+@click.argument("numbers", nargs=-1, required=False)
 def add_even(numbers):
-    """Add only even numbers from the provided list."""
+    """Add only even numbers. Reads from stdin if no arguments given."""
+    numbers = numbers or _read_numbers_from_stdin()
+    if not numbers:
+        click.echo("Error: provide numbers as arguments or via stdin.", err=True)
+        raise SystemExit(1)
     parsed = _parse_numbers(numbers)
     try:
         evens = filter_even(parsed)
@@ -49,9 +58,13 @@ def add_even(numbers):
 
 
 @add.command("odd")
-@click.argument("numbers", nargs=-1, required=True)
+@click.argument("numbers", nargs=-1, required=False)
 def add_odd(numbers):
-    """Add only odd numbers from the provided list."""
+    """Add only odd numbers. Reads from stdin if no arguments given."""
+    numbers = numbers or _read_numbers_from_stdin()
+    if not numbers:
+        click.echo("Error: provide numbers as arguments or via stdin.", err=True)
+        raise SystemExit(1)
     parsed = _parse_numbers(numbers)
     try:
         odds = filter_odd(parsed)
@@ -69,9 +82,13 @@ def add_odd(numbers):
 # ─── SUBTRACT ─────────────────────────────────────────────────────────────────
 
 @main.command()
-@click.argument("numbers", nargs=-1, required=True)
+@click.argument("numbers", nargs=-1, required=False)
 def sub(numbers):
-    """Subtract numbers left to right (e.g. 10 3 2 => 10 - 3 - 2)."""
+    """Subtract numbers left to right. Reads from stdin if no arguments given."""
+    numbers = numbers or _read_numbers_from_stdin()
+    if not numbers:
+        click.echo("Error: provide numbers as arguments or via stdin.", err=True)
+        raise SystemExit(1)
     parsed = _parse_numbers(numbers)
     result = subtract(parsed)
     click.echo(f"Result: {result}")
@@ -80,9 +97,13 @@ def sub(numbers):
 # ─── MULTIPLY ─────────────────────────────────────────────────────────────────
 
 @main.command()
-@click.argument("numbers", nargs=-1, required=True)
+@click.argument("numbers", nargs=-1, required=False)
 def mul(numbers):
-    """Multiply numbers together."""
+    """Multiply numbers together. Reads from stdin if no arguments given."""
+    numbers = numbers or _read_numbers_from_stdin()
+    if not numbers:
+        click.echo("Error: provide numbers as arguments or via stdin.", err=True)
+        raise SystemExit(1)
     parsed = _parse_numbers(numbers)
     result = multiply(parsed)
     click.echo(f"Result: {result}")
@@ -91,9 +112,13 @@ def mul(numbers):
 # ─── DIVIDE ───────────────────────────────────────────────────────────────────
 
 @main.command()
-@click.argument("numbers", nargs=-1, required=True)
+@click.argument("numbers", nargs=-1, required=False)
 def div(numbers):
-    """Divide numbers left to right (e.g. 20 4 2 => 20 / 4 / 2)."""
+    """Divide numbers left to right. Reads from stdin if no arguments given."""
+    numbers = numbers or _read_numbers_from_stdin()
+    if not numbers:
+        click.echo("Error: provide numbers as arguments or via stdin.", err=True)
+        raise SystemExit(1)
     parsed = _parse_numbers(numbers)
     try:
         result = divide(parsed)
@@ -130,6 +155,15 @@ def sqrt(number):
 
 
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+def _read_numbers_from_stdin() -> tuple[str, ...]:
+    """Read whitespace-separated numbers from stdin if available."""
+    if not sys.stdin.isatty():
+        data = sys.stdin.read().strip()
+        if data:
+            return tuple(data.split())
+    return ()
+
 
 def _parse_numbers(raw: tuple) -> list[int | float]:
     """

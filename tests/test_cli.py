@@ -21,7 +21,13 @@ def test_add_all_floats():
 
 def test_add_all_no_args():
     result = runner.invoke(main, ["add", "all"])
-    assert result.exit_code != 0
+    assert result.exit_code == 1
+
+
+def test_add_auto_detects_float():
+    result = runner.invoke(main, ["add", "all", "1", "2.5", "3"])
+    assert result.exit_code == 0
+    assert "Result: 6.5" in result.output
 
 
 # ─── ADD EVEN ─────────────────────────────────────────────────────────────────
@@ -36,6 +42,11 @@ def test_add_even_none_found():
     result = runner.invoke(main, ["add", "even", "1", "3", "5"])
     assert result.exit_code == 0
     assert "No even numbers found." in result.output
+
+
+def test_add_even_rejects_non_whole_float():
+    result = runner.invoke(main, ["add", "even", "1.5", "2.5"])
+    assert result.exit_code == 1
 
 
 # ─── ADD ODD ──────────────────────────────────────────────────────────────────
@@ -66,6 +77,11 @@ def test_sub_floats():
     assert "Result: 10.0" in result.output
 
 
+def test_sub_no_args():
+    result = runner.invoke(main, ["sub"])
+    assert result.exit_code == 1
+
+
 # ─── MULTIPLY ─────────────────────────────────────────────────────────────────
 
 def test_mul_basic():
@@ -80,6 +96,11 @@ def test_mul_by_zero():
     assert "Result: 0" in result.output
 
 
+def test_mul_no_args():
+    result = runner.invoke(main, ["mul"])
+    assert result.exit_code == 1
+
+
 # ─── DIVIDE ───────────────────────────────────────────────────────────────────
 
 def test_div_basic():
@@ -90,6 +111,11 @@ def test_div_basic():
 
 def test_div_by_zero():
     result = runner.invoke(main, ["div", "10", "0"])
+    assert result.exit_code == 1
+
+
+def test_div_no_args():
+    result = runner.invoke(main, ["div"])
     assert result.exit_code == 1
 
 
@@ -119,10 +145,61 @@ def test_sqrt_negative():
     result = runner.invoke(main, ["sqrt", "--", "-1"])
     assert result.exit_code == 1
 
+
+# ─── INVALID INPUT ────────────────────────────────────────────────────────────
+
+def test_parse_invalid_input():
+    result = runner.invoke(main, ["add", "all", "abc"])
+    assert result.exit_code == 1
+
+
+# ─── PIPELINE / STDIN ─────────────────────────────────────────────────────────
+
+def test_add_all_from_stdin():
+    result = runner.invoke(main, ["add", "all"], input="1 2 3")
+    assert result.exit_code == 0
+    assert "Result: 6" in result.output
+
+
+def test_add_even_from_stdin():
+    result = runner.invoke(main, ["add", "even"], input="1 2 3 4 5")
+    assert result.exit_code == 0
+    assert "Result: 6" in result.output
+
+
+def test_sub_from_stdin():
+    result = runner.invoke(main, ["sub"], input="10 3 2")
+    assert result.exit_code == 0
+    assert "Result: 5" in result.output
+
+
+def test_mul_from_stdin():
+    result = runner.invoke(main, ["mul"], input="2 3 4")
+    assert result.exit_code == 0
+    assert "Result: 24" in result.output
+
+
+def test_div_from_stdin():
+    result = runner.invoke(main, ["div"], input="20 4")
+    assert result.exit_code == 0
+    assert "Result: 5.0" in result.output
+
+
+def test_no_args_no_stdin():
+    result = runner.invoke(main, ["add", "all"])
+    assert result.exit_code == 1
+
+
 # ─── HELP ─────────────────────────────────────────────────────────────────────
 
 def test_main_help():
     result = runner.invoke(main, ["--help"])
+    assert result.exit_code == 0
+    assert "Usage:" in result.output
+
+
+def test_main_help_short_flag():
+    result = runner.invoke(main, ["-h"])
     assert result.exit_code == 0
     assert "Usage:" in result.output
 
@@ -132,17 +209,3 @@ def test_add_cmd_help():
     assert result.exit_code == 0
     assert "even" in result.output
     assert "odd" in result.output
-
-
-def test_add_even_rejects_non_whole_float():
-    result = runner.invoke(main, ["add", "even", "1.5", "2.5"])
-    assert result.exit_code == 1
-
-def test_parse_invalid_input():
-    result = runner.invoke(main, ["add", "all", "abc"])
-    assert result.exit_code == 1
-
-def test_add_auto_detects_float():
-    result = runner.invoke(main, ["add", "all", "1", "2.5", "3"])
-    assert result.exit_code == 0
-    assert "Result: 6.5" in result.output
