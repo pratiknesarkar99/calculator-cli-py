@@ -6,10 +6,29 @@ build-backend = "setuptools.build_meta"
 name = "calculator-cli"
 version = "0.1.0"
 description = "A CLI calculator built with Click"
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
+authors = [
+    { name = "Pratik", email = "pratik.nesarkar@tamu.edu" }
+]
+keywords = ["calculator", "cli", "click"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+]
 dependencies = [
     "click>=8.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/pratiknesarkar99"
+Repository = "https://github.com/pratiknesarkar99/calculator-cli-py"
 
 [project.scripts]
 calc = "calculator.cli:main"
@@ -21,4 +40,5 @@ where = ["src"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
+    "pip-tools",
 ]

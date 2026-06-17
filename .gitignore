@@ -35,3 +35,6 @@ coverage.xml
 .idea/
 *.swp
 *.swo
+
+# pip-tools
+.pip-tools-cache/
