@@ -208,3 +208,13 @@ def test_add_cmd_help():
     assert result.exit_code == 0
     assert "even" in result.output
     assert "odd" in result.output
+
+def test_version_flag():
+    result = runner.invoke(main, ["--version"])
+    assert result.exit_code == 0
+    assert "0.1.0" in result.output
+
+def test_version_short_flag():
+    result = runner.invoke(main, ["-V"])
+    assert result.exit_code == 0
+    assert "0.1.0" in result.output

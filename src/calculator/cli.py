@@ -5,11 +5,13 @@ from calculator.operations import (
     power, square_root, filter_even, filter_odd
 )
 from calculator.exit_codes import ExitCode
+from calculator import __version__
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(__version__, "-V", "--version", prog_name="calc")
 def main():
     """A CLI calculator supporting basic arithmetic operations."""
     pass
