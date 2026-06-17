@@ -14,7 +14,7 @@ def test_add_all_integers():
 
 
 def test_add_all_floats():
-    result = runner.invoke(main, ["add", "all", "1.5", "2.5", "-f"])
+    result = runner.invoke(main, ["add", "all", "1.5", "2.5"])
     assert result.exit_code == 0
     assert "Result: 4.0" in result.output
 
@@ -61,7 +61,7 @@ def test_sub_basic():
 
 
 def test_sub_floats():
-    result = runner.invoke(main, ["sub", "10.5", "0.5", "-f"])
+    result = runner.invoke(main, ["sub", "10.5", "0.5"])
     assert result.exit_code == 0
     assert "Result: 10.0" in result.output
 
@@ -132,3 +132,17 @@ def test_add_cmd_help():
     assert result.exit_code == 0
     assert "even" in result.output
     assert "odd" in result.output
+
+
+def test_add_even_rejects_non_whole_float():
+    result = runner.invoke(main, ["add", "even", "1.5", "2.5"])
+    assert result.exit_code == 1
+
+def test_parse_invalid_input():
+    result = runner.invoke(main, ["add", "all", "abc"])
+    assert result.exit_code == 1
+
+def test_add_auto_detects_float():
+    result = runner.invoke(main, ["add", "all", "1", "2.5", "3"])
+    assert result.exit_code == 0
+    assert "Result: 6.5" in result.output

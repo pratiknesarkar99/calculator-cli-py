@@ -1,11 +1,13 @@
 import click
 from calculator.operations import (
-    add, subtract, multiply, divide,
+    add as op_add, subtract, multiply, divide,
     power, square_root, filter_even, filter_odd
 )
 
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
-@click.group()
+
+@click.group(context_settings=CONTEXT_SETTINGS)
 def main():
     """A CLI calculator supporting basic arithmetic operations."""
     pass
@@ -14,47 +16,52 @@ def main():
 # ─── ADD ──────────────────────────────────────────────────────────────────────
 
 @main.group()
-def add_cmd():
+def add():
     """Add multiple numbers together."""
     pass
 
 
-@add_cmd.command("all")
+@add.command("all")
 @click.argument("numbers", nargs=-1, required=True)
-@click.option("-f", "--float", "use_float", is_flag=True, help="Treat inputs as floating point numbers.")
-def add_all(numbers, use_float):
+def add_all(numbers):
     """Add all provided numbers."""
-    parsed = _parse_numbers(numbers, use_float)
-    result = add(parsed)
+    parsed = _parse_numbers(numbers)
+    result = op_add(parsed)
     click.echo(f"Result: {result}")
 
 
-@add_cmd.command("even")
+@add.command("even")
 @click.argument("numbers", nargs=-1, required=True)
-@click.option("-f", "--float", "use_float", is_flag=True, help="Treat inputs as floating point numbers.")
-def add_even(numbers, use_float):
+def add_even(numbers):
     """Add only even numbers from the provided list."""
-    parsed = _parse_numbers(numbers, use_float)
-    evens = filter_even(parsed)
+    parsed = _parse_numbers(numbers)
+    try:
+        evens = filter_even(parsed)
+    except ValueError as e:
+        click.echo(f"Error: {e}", err=True)
+        raise SystemExit(1)
     if not evens:
         click.echo("No even numbers found.")
         return
-    result = add(evens)
+    result = op_add(evens)
     click.echo(f"Even numbers: {evens}")
     click.echo(f"Result: {result}")
 
 
-@add_cmd.command("odd")
+@add.command("odd")
 @click.argument("numbers", nargs=-1, required=True)
-@click.option("-f", "--float", "use_float", is_flag=True, help="Treat inputs as floating point numbers.")
-def add_odd(numbers, use_float):
+def add_odd(numbers):
     """Add only odd numbers from the provided list."""
-    parsed = _parse_numbers(numbers, use_float)
-    odds = filter_odd(parsed)
+    parsed = _parse_numbers(numbers)
+    try:
+        odds = filter_odd(parsed)
+    except ValueError as e:
+        click.echo(f"Error: {e}", err=True)
+        raise SystemExit(1)
     if not odds:
         click.echo("No odd numbers found.")
         return
-    result = add(odds)
+    result = op_add(odds)
     click.echo(f"Odd numbers: {odds}")
     click.echo(f"Result: {result}")
 
@@ -63,10 +70,9 @@ def add_odd(numbers, use_float):
 
 @main.command()
 @click.argument("numbers", nargs=-1, required=True)
-@click.option("-f", "--float", "use_float", is_flag=True, help="Treat inputs as floating point numbers.")
-def sub(numbers, use_float):
+def sub(numbers):
     """Subtract numbers left to right (e.g. 10 3 2 => 10 - 3 - 2)."""
-    parsed = _parse_numbers(numbers, use_float)
+    parsed = _parse_numbers(numbers)
     result = subtract(parsed)
     click.echo(f"Result: {result}")
 
@@ -75,10 +81,9 @@ def sub(numbers, use_float):
 
 @main.command()
 @click.argument("numbers", nargs=-1, required=True)
-@click.option("-f", "--float", "use_float", is_flag=True, help="Treat inputs as floating point numbers.")
-def mul(numbers, use_float):
+def mul(numbers):
     """Multiply numbers together."""
-    parsed = _parse_numbers(numbers, use_float)
+    parsed = _parse_numbers(numbers)
     result = multiply(parsed)
     click.echo(f"Result: {result}")
 
@@ -87,10 +92,9 @@ def mul(numbers, use_float):
 
 @main.command()
 @click.argument("numbers", nargs=-1, required=True)
-@click.option("-f", "--float", "use_float", is_flag=True, help="Treat inputs as floating point numbers.")
-def div(numbers, use_float):
+def div(numbers):
     """Divide numbers left to right (e.g. 20 4 2 => 20 / 4 / 2)."""
-    parsed = _parse_numbers(numbers, use_float)
+    parsed = _parse_numbers(numbers)
     try:
         result = divide(parsed)
         click.echo(f"Result: {result}")
@@ -104,7 +108,7 @@ def div(numbers, use_float):
 @main.command()
 @click.argument("base", type=float)
 @click.argument("exponent", type=float)
-def pow_cmd(base, exponent):
+def pow(base, exponent):
     """Raise BASE to the power of EXPONENT."""
     result = power(base, exponent)
     click.echo(f"Result: {result}")
@@ -124,14 +128,27 @@ def sqrt(number):
         click.echo(f"Error: {e}", err=True)
         raise SystemExit(1)
 
+
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 
-def _parse_numbers(raw: tuple, use_float: bool) -> list:
-    """Parse CLI string arguments into int or float."""
-    try:
-        if use_float:
-            return [float(n) for n in raw]
-        return [int(n) for n in raw]
-    except ValueError:
-        click.echo("Error: All arguments must be valid numbers.", err=True)
-        raise SystemExit(1)
+def _parse_numbers(raw: tuple) -> list[int | float]:
+    """
+    Auto-detect int vs float from input strings.
+    '3' -> 3 (int), '3.0' or '3.5' -> 3.0 (float).
+    """
+    result = []
+    for n in raw:
+        try:
+            as_float = float(n)
+            if as_float == int(as_float) and "." not in n:
+                result.append(int(as_float))
+            else:
+                result.append(as_float)
+        except ValueError:
+            click.echo(
+                f"Error: '{n}' is not a valid number. "
+                "Provide integers (1 2 3) or decimals (1.5 2.5).",
+                err=True,
+            )
+            raise SystemExit(1)
+    return result

@@ -42,8 +42,24 @@ def square_root(n: Number) -> float:
 
 
 def filter_even(numbers: list[Number]) -> list[Number]:
-    return [n for n in numbers if int(n) % 2 == 0]
+    result = []
+    for n in numbers:
+        if n != int(n):
+            raise ValueError(
+                f"{n} is not a whole number. even/odd filtering requires whole numbers."
+            )
+        if int(n) % 2 == 0:
+            result.append(n)
+    return result
 
 
 def filter_odd(numbers: list[Number]) -> list[Number]:
-    return [n for n in numbers if int(n) % 2 != 0]
+    result = []
+    for n in numbers:
+        if n != int(n):
+            raise ValueError(
+                f"{n} is not a whole number. even/odd filtering requires whole numbers."
+            )
+        if int(n) % 2 != 0:
+            result.append(n)
+    return result

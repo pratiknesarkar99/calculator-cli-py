@@ -59,13 +59,22 @@ def test_sqrt_negative():
 
 
 # --- filter_even ---
+
 def test_filter_even():
     assert filter_even([1, 2, 3, 4, 5]) == [2, 4]
 
-def test_filter_even_floats():
+def test_filter_even_whole_float():
     assert filter_even([1.0, 2.0, 3.0]) == [2.0]
 
+def test_filter_even_rejects_non_whole_float():
+    with pytest.raises(ValueError, match="whole number"):
+        filter_even([1.5, 2.5])
 
 # --- filter_odd ---
+
 def test_filter_odd():
     assert filter_odd([1, 2, 3, 4, 5]) == [1, 3, 5]
+
+def test_filter_odd_rejects_non_whole_float():
+    with pytest.raises(ValueError, match="whole number"):
+        filter_odd([1.5, 3.5])
