@@ -4,6 +4,8 @@ A command-line calculator built with Python and Click. Supports basic arithmetic
 operations, even/odd filtering on addition, and bonus operations like power and
 square root.
 
+<img width="1470" height="956" alt="image" src="https://github.com/user-attachments/assets/dc63bc95-6dd0-4410-86af-9f4bed75dd43" />
+
 Built as a portfolio project following the
 [App Ideas Collection](https://github.com/florinpop17/app-ideas) Tier 2 spec.
 
